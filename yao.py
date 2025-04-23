@@ -1,5 +1,7 @@
 import random
 from Crypto.Cipher import AES
+from pathlib import Path
+import json
 
 class Gate:
     """Generic Gate Object"""
@@ -35,7 +37,6 @@ class LogicGate(Gate):
 
 
     def evaluate(self, input_values: list[int]) -> int:
-
         if not all([(value in [0, 1]) for value in input_values]):
             raise ValueError("Gate values must be given in binary: 0 or 1")
 
@@ -48,6 +49,22 @@ class LogicGate(Gate):
 
         return self.values[truth_table_idx]
 
+    def __repr__(self) -> str:
+        header = f"{self.__class__.__name__}({self.id})"
+        inputs = f"<{','.join(str(x) for x in self.inputs)}>"
+        values = f"[{''.join(str(x) for x in self.values)}]"
+        return header + inputs + values
+
+    def as_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "inputs": self.inputs,
+            "values": self.values
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict):
+        return cls(payload["id"], payload["inputs"], payload["values"])
 
 class GarbledGate(Gate):
 
@@ -82,6 +99,27 @@ class GarbledGate(Gate):
             ValueError("Cannot find valid plaintext from AES decryption")
 
         return output_key
+
+    def __repr__(self) -> str:
+        header = f"{self.__class__.__name__}({self.id})"
+        inputs = f"<{','.join(str(x) for x in self.inputs)}>"
+        values = f"[{','.join(x.hex() for x in self.values)}]"
+        return header + inputs + values
+
+    def as_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "inputs": self.inputs,
+            "values": [ b.hex() for b in self.values ]
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict):
+        return cls(
+            payload["id"],
+            payload["inputs"],
+            [ bytes.fromhex(x) for x in payload["values"] ]
+        )
 
 class Circuit:
 
@@ -145,6 +183,34 @@ class LogicCircuit(Circuit):
     
     def evaluate(self, input_bits: list[int]) -> list[int]:
         return super().evaluate(input_bits)
+    
+    def as_dict(self) -> dict:
+        return {
+            "input_ids": self.input_ids,
+            "output_ids": self.output_ids,
+            "gates": [ g.as_dict() for g in self.gates ]
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict):
+        return cls(
+            payload["input_ids"],
+            payload["output_ids"],
+            [ LogicGate.from_dict(g) for g in payload["gates"] ] 
+        )
+
+    def store_in_file(self, filepath: Path):
+        with open(filepath, "w") as lc_file:
+            lc_file.write(json.dumps(self.as_dict(), indent=4))
+
+    @classmethod
+    def load_from_file(cls, filepath: Path):
+        if not Path(filepath).exists():
+            raise FileNotFoundError(f"Given LogicCircuit file does not exist ({filepath})")
+
+        with open(filepath) as lc_file:
+            instance = cls.from_dict(json.loads(lc_file.read()))
+        return instance
 
 class GarbledCircuit(Circuit):
 
@@ -158,6 +224,37 @@ class GarbledCircuit(Circuit):
 
     def evaluate(self) -> list[bytes]:
         return super().evaluate(self.input_keys)
+
+    def as_dict(self) -> dict:
+        return {
+            "input_ids": self.input_ids,
+            "output_ids": self.output_ids,
+            "garbled_gates": [ g.as_dict() for g in self.gates ],
+            "input_keys": [ key.hex() for key in self.input_keys ]
+        }
+
+    @classmethod
+    def from_dict(cls, payload: dict):
+        return cls(
+            payload["input_ids"],
+            payload["output_ids"],
+            [ GarbledGate.from_dict(g) for g in payload["garbled_gates"] ],
+            [ bytes.fromhex(key) for key in payload["input_keys"] ]
+        )
+
+    def store_in_file(self, filepath: Path):
+        with open(filepath, "w") as gc_file:
+            gc_file.write(json.dumps(self.as_dict(), indent=4))
+
+    @classmethod
+    def load_from_file(cls, filepath: str):
+
+        if not Path(filepath).exists():
+            raise FileNotFoundError(f"Given GarbledCircuit file does not exist ({filepath})")
+
+        with open(filepath) as gc_file:
+            instance = cls.from_dict(json.loads(gc_file.read()))
+        return instance
 
 class Garbler:
 
