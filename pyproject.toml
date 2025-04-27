@@ -1,0 +1,20 @@
+[project]
+name = "yaosfe"
+version = "0.1.0"
+description = "Secure Function Evaluation using Yao's Garbled Circuits"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "pycryptodome>=3.22.0",
+]
+
+[project.scripts]
+yao = "yaosfe.cli:main"
+ 
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
