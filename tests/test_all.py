@@ -1,6 +1,8 @@
 from unittest import TestCase
 
-from yaosfe.yao import Garbler, LogicCircuit, LogicGate
+from yaosfe.garbler import Garbler
+from yaosfe.circuits import LogicCircuit
+from yaosfe.gates import LogicGate
 from yaosfe.examples import LC_ADD_1BIT, LC_ADD_2BIT, LC_ADD_3BIT
 from yaosfe.util import gen_nbit_inputs
 

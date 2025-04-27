@@ -1,4 +1,5 @@
-from yaosfe.yao import LogicCircuit, LogicGate
+from yaosfe.circuits import LogicCircuit
+from yaosfe.gates import LogicGate
 
 G_XOR = [0, 1, 1, 0]
 G_AND = [0, 0, 0, 1]

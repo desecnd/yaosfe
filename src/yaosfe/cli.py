@@ -1,8 +1,10 @@
 import argparse
 from pathlib import Path
 
-from yaosfe.yao import Garbler, GarbledCircuit, LogicCircuit, LogicGate, GarbledGate
-from yaosfe.util import bits_from_str, bits_to_str
+from yaosfe.gates import GarbledGate
+from yaosfe.circuits import GarbledCircuit, LogicCircuit
+from yaosfe.garbler import Garbler
+from yaosfe.util import bits_to_str
 
 def print_error(message: str):
     print(f"\x1b[31m[!] Error:\x1b[0m {message}")
@@ -20,7 +22,7 @@ def print_error_and_exit(message: str):
     print_error(message)
     exit(1)
 
-def do_garbler(args):
+def run_garbler(args):
     print_run("Garbler")
 
     lc_path = Path(args.logic_circuit)
@@ -63,7 +65,7 @@ def do_garbler(args):
         else:
             print_error(f"Verify => Output does not match: {bits_to_str(bits)}")
 
-def do_evaluator(args):
+def run_evaluator(args):
     print_run("Evaluator")
 
     gc_filepath = args.garbled_circuit
@@ -89,11 +91,11 @@ def main():
     parser_garbler.add_argument("input_bits")
     parser_garbler.add_argument("-o", "--output", default="gc_out.json")
     parser_garbler.add_argument("-v", "--verify", action="store_true", default=False)
-    parser_garbler.set_defaults(func=do_garbler)
+    parser_garbler.set_defaults(func=run_garbler)
 
     parser_evaluate = subparsers.add_parser("evaluator", help="Evaluate a given circuit")
     parser_evaluate.add_argument("garbled_circuit")
-    parser_evaluate.set_defaults(func=do_evaluator)
+    parser_evaluate.set_defaults(func=run_evaluator)
 
     args = parser.parse_args()
     args.func(args)
