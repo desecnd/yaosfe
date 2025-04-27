@@ -5,16 +5,16 @@ from yaosfe.yao import Garbler, GarbledCircuit, LogicCircuit, LogicGate, Garbled
 from yaosfe.util import bits_from_str, bits_to_str
 
 def print_error(message: str):
-    print(f"[!] Error: {message}")
+    print(f"\x1b[31m[!] Error:\x1b[0m {message}")
 
 def print_info(message: str):
-    print(f"[.] Info: {message}")
+    print(f"\x1b[34m[.] Info:\x1b[0m {message}")
 
 def print_ok(message: str):
-    print(f"[+] Ok: {message}")
+    print(f"\x1b[32m[+] Ok:\x1b[0m {message}")
 
 def print_run(message: str):
-    print(f"[%] Run: {message}")
+    print(f"\x1b[33m[%] Run:\x1b[0m {message}")
 
 def print_error_and_exit(message: str):
     print_error(message)
@@ -94,8 +94,6 @@ def main():
     parser_evaluate = subparsers.add_parser("evaluator", help="Evaluate a given circuit")
     parser_evaluate.add_argument("garbled_circuit")
     parser_evaluate.set_defaults(func=do_evaluator)
-
-    # args = parser.parse_args(["garbler", "a", "b", "-o", "output", "-v"])
 
     args = parser.parse_args()
     args.func(args)
