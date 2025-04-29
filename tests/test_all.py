@@ -3,7 +3,7 @@ from unittest import TestCase
 from yaosfe.garbler import Garbler
 from yaosfe.circuits import LogicCircuit
 from yaosfe.gates import LogicGate
-from yaosfe.examples import LC_ADD_1BIT, LC_ADD_2BIT, LC_ADD_3BIT
+from yaosfe.examples import LC_ADD_1BIT, LC_ADD_2BIT, LC_ADD_3BIT, LC_AVG_3BIT
 from yaosfe.util import gen_nbit_inputs
 
 class TestLogicGates(TestCase):
@@ -111,8 +111,10 @@ class TestExampleCircuits(TestCase):
     def test_3bit_adder(self):
         self.run_nbit_adder_test(LC_ADD_3BIT)
 
-    def run_3bit_avg_test(self, lc: LogicCircuit):
+    def test_3bit_avg_test(self):
         garbler = Garbler(seed=42)
+
+        lc = LC_AVG_3BIT
 
         # Average of two 3-bit numbers is 3-bit wide 
         self.assertEqual(len(lc.output_ids), 3)
